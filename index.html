@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mico-claudebar · Installation Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d; --surface: #141414; --surface2: #1a1a1a;
+    --border: #2a2a2a; --text: #e8e8e8; --muted: #666;
+    --green: #4ade80; --yellow: #fbbf24; --red: #f87171;
+    --mono: 'JetBrains Mono', monospace; --sans: 'Noto Sans TC', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { max-width: 100%; overflow-x: hidden; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.7; min-height: 100vh; }
+
+  .hero { border-bottom: 1px solid var(--border); padding: 64px 40px 48px; max-width: 860px; margin: 0 auto; }
+  .hero-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 20px; }
+  .hero h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
+  .hero h1 span { color: var(--muted); font-weight: 400; }
+  .hero-sub { font-size: 15px; color: var(--muted); margin-bottom: 32px; }
+
+  .terminal { background: #0a0a0a; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; font-family: var(--mono); font-size: 13px; }
+  .terminal-bar { background: #1c1c1c; padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
+  .terminal-title { margin-left: 8px; color: var(--muted); font-size: 12px; }
+  .terminal-body { padding: 20px 24px; overflow-x: auto; }
+  .t-line { margin-bottom: 6px; white-space: nowrap; }
+  .t-cmd { color: var(--text); } .t-green { color: var(--green); } .t-yellow { color: var(--yellow); } .t-red { color: var(--red); } .t-muted { color: #555; }
+
+  .tabs-wrap { max-width: 860px; margin: 0 auto; padding: 48px 40px 0; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 48px; }
+  .tab { padding: 10px 20px; font-family: var(--mono); font-size: 13px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; user-select: none; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--text); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .steps { max-width: 860px; margin: 0 auto; padding: 0 40px 80px; }
+  .step { display: grid; grid-template-columns: 56px 1fr; gap: 0 28px; margin-bottom: 56px; opacity: 0; transform: translateY(16px); animation: fadeUp 0.4s forwards; }
+  .step:nth-child(1){animation-delay:.05s} .step:nth-child(2){animation-delay:.1s} .step:nth-child(3){animation-delay:.15s} .step:nth-child(4){animation-delay:.2s} .step:nth-child(5){animation-delay:.25s}
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  .step-num { display: flex; flex-direction: column; align-items: center; }
+  .step-circle { width: 40px; height: 40px; border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 13px; color: var(--muted); flex-shrink: 0; }
+  .step-line { width: 1px; flex: 1; background: var(--border); margin-top: 8px; min-height: 40px; }
+  .step:last-child .step-line { display: none; }
+  .step-body { padding-top: 8px; min-width: 0; }
+  .step-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .step-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em; }
+  .step-desc { font-size: 14px; color: #999; margin-bottom: 20px; line-height: 1.6; }
+  .step-desc strong { color: var(--text); font-weight: 500; }
+
+  .code-block { background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; max-width: 100%; }
+  .code-header { background: #111; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .code-lang { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+  .copy-btn { font-family: var(--mono); font-size: 11px; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 4px; padding: 3px 10px; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+  .copy-btn:hover { color: var(--text); border-color: #444; }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+  .code-body { padding: 16px 20px; font-family: var(--mono); font-size: 13px; line-height: 1.8; overflow-x: auto; white-space: pre; display: block; -webkit-overflow-scrolling: touch; }
+  .c-comment { color: #555; } .c-cmd { color: #e8e8e8; } .c-path { color: #7dd3fc; } .c-str { color: #86efac; } .c-key { color: #fbbf24; }
+
+  .note { background: #111; border-left: 2px solid var(--border); border-radius: 0 6px 6px 0; padding: 12px 16px; font-size: 13px; color: #888; margin-bottom: 16px; line-height: 1.6; }
+  .note.warn { border-left-color: var(--yellow); }
+  .note strong { color: var(--text); }
+
+  .preview-bar { background: #0a0a0a; border: 1px solid var(--border); border-radius: 8px; padding: 14px 20px; font-family: var(--mono); font-size: 13px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .bar-green { color: var(--green); } .bar-yellow { color: var(--yellow); } .bar-red { color: var(--red); }
+
+  .legend { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 12px; background: #0f0f0f; border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; }
+  .legend-sym { font-family: var(--mono); font-size: 15px; width: 24px; text-align: center; color: var(--muted); }
+  .legend-text { font-size: 13px; }
+  .legend-text small { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+  .trouble-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .trouble-item { background: #0f0f0f; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; }
+  .trouble-q { font-family: var(--mono); font-size: 12px; color: var(--red); margin-bottom: 6px; }
+  .trouble-a { font-size: 13px; color: #999; line-height: 1.5; }
+  .trouble-a code { font-family: var(--mono); font-size: 12px; background: #1a1a1a; padding: 1px 6px; border-radius: 3px; color: var(--text); }
+
+  .color-badges { display: flex; gap: 10px; margin: 16px 0; flex-wrap: wrap; }
+  .badge { padding: 6px 14px; border-radius: 4px; font-family: var(--mono); font-size: 12px; border: 1px solid; }
+  .badge-g { color: var(--green); border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.05); }
+  .badge-y { color: var(--yellow); border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.05); }
+  .badge-r { color: var(--red); border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.05); }
+
+  .trouble-wrap { max-width: 860px; margin: 0 auto; }
+
+  @media (max-width: 640px) {
+    .hero { padding: 36px 20px 32px; }
+    .hero h1 { font-size: 24px; }
+    .terminal-body { padding: 14px; font-size: 11px; }
+    .tabs-wrap { padding: 32px 20px 0; }
+    .tabs { gap: 0; margin-bottom: 32px; }
+    .tab { padding: 10px 12px; font-size: 12px; flex: 1; text-align: center; }
+    .steps { padding: 0 20px 60px; }
+    .step { grid-template-columns: 40px 1fr; gap: 0 16px; margin-bottom: 40px; }
+    .step-circle { width: 32px; height: 32px; font-size: 11px; }
+    .step-title { font-size: 16px; }
+    .step-desc { font-size: 13px; }
+    .code-body { font-size: 11px; padding: 14px; }
+    .legend { grid-template-columns: 1fr; }
+    .preview-bar { font-size: 11px; padding: 12px 14px; flex-direction: column; align-items: flex-start; gap: 6px; }
+    .color-badges { flex-direction: column; gap: 8px; }
+    .badge { font-size: 11px; }
+    .trouble-wrap { padding: 32px 20px 60px !important; }
+    .note { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-label">Installation Guide · 安裝教學</div>
+  <h1>mico-claudebar <span>/ setup</span></h1>
+  <p class="hero-sub">Visual progress bar for Claude Code · Claude Code 視覺化狀態列</p>
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+      <div class="terminal-title">Claude Code — statusline preview</div>
+    </div>
+    <div class="terminal-body">
+      <div class="t-line"><span class="t-cmd">◆ Claude Sonnet 4&nbsp;&nbsp;▸ miko-digital&nbsp;&nbsp;⎇ main&nbsp;&nbsp;▓ [</span><span class="t-green">████████</span><span class="t-muted">░░</span><span class="t-cmd">]&nbsp;</span><span class="t-green">78%</span></div>
+      <div class="t-line" style="margin-top:10px"><span class="t-cmd">◆ Claude Sonnet 4&nbsp;&nbsp;▸ restaurant-web&nbsp;&nbsp;⎇ feature/menu&nbsp;&nbsp;▓ [</span><span class="t-yellow">███████</span><span class="t-muted">░░░</span><span class="t-cmd">]&nbsp;</span><span class="t-yellow">72%</span></div>
+      <div class="t-line" style="margin-top:10px"><span class="t-cmd">◆ Claude Opus 4&nbsp;&nbsp;▸ client-landing&nbsp;&nbsp;⎇ main&nbsp;&nbsp;▓ [</span><span class="t-red">█████████</span><span class="t-muted">░</span><span class="t-cmd">]&nbsp;</span><span class="t-red">93%</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="tabs-wrap">
+  <div class="tabs">
+    <div class="tab active" onclick="switchOS('mac')">macOS</div>
+    <div class="tab" onclick="switchOS('linux')">Linux</div>
+    <div class="tab" onclick="switchOS('windows')">Windows</div>
+  </div>
+</div>
+
+<!-- macOS -->
+<div class="steps tab-content active" id="os-mac">
+  <div class="step">
+    <div class="step-num"><div class="step-circle">01</div><div class="step-line"></div></div>
+    <div class="step-body">
+      <div class="step-tag">Prerequisite · 前置需求</div>
+      <div class="step-title">安裝 jq</div>
+      <div class="step-desc">jq 是用來讀取資料的小工具，mico-claudebar 需要它才能運作。<br><strong>Install jq</strong> — a small JSON parser that mico-claudebar depends on.</div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" data-id="c01" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body"><span class="c-cmd">brew install jq</span></div>
+      </div>
+      <div class="note">看到 <strong>command not found: brew</strong>？請先到 <strong>brew.sh</strong> 安裝 Homebrew，網站首頁有一行指令複製貼上即可。<br><span style="color:#555">If you see this error, install Homebrew first at brew.sh</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num"><div class="step-circle">02</div><div class="step-line"></div></div>
+    <div class="step-body">
+      <div class="step-tag">Download · 下載</div>
+      <div class="step-title">下載腳本</div>
+      <div class="step-desc">把 mico-claudebar 下載到 Claude Code 的設定資料夾。<br><strong>Download the script</strong> into Claude Code's config folder.</div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" data-id="c02" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body"><span class="c-cmd">curl -o </span><span class="c-path">~/.claude/statusline.sh</span><span class="c-cmd"> \
+  https://raw.githubusercontent.com/miss31413/mico-claudebar/main/statusline.sh
+chmod +x </span><span class="c-path">~/.claude/statusline.sh</span></div>
+      </div>
+      <div class="note"><strong>chmod +x</strong> 是告訴電腦「這個檔案可以被執行」，少了這步會出現權限錯誤。<br><span style="color:#555">This gives the script executable permission — required to run it.</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num"><div class="step-circle">03</div><div class="step-line"></div></div>
+    <div class="step-body">
+      <div class="step-tag">Config · 設定</div>
+      <div class="step-title">修改 settings.json</div>
+      <div class="step-desc">告訴 Claude Code 使用我們的狀態列腳本。<br><strong>Tell Claude Code</strong> to use your statusline script.</div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash — open file</span><button class="copy-btn" data-id="c03" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body"><span class="c-cmd">open </span><span class="c-path">~/.claude/settings.json</span></div>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">json — paste this · 貼入這段內容</span><button class="copy-btn" data-id="c04" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body"><span class="c-cmd">{
+  </span><span class="c-key">"statusLine"</span><span class="c-cmd">: {
+    </span><span class="c-key">"type"</span><span class="c-cmd">: </span><span class="c-str">"command"</span><span class="c-cmd">,
+    </span><span class="c-key">"command"</span><span class="c-cmd">: </span><span class="c-str">"~/.claude/statusline.sh"</span><span class="c-cmd">
+  }
+}</span></div>
+      </div>
+      <div class="note warn">⚠️ 如果 settings.json 裡已經有其他設定，不要整個覆蓋——只把 <strong>"statusLine"</strong> 這段加進去。<br><span style="color:#555">Don't overwrite existing settings — just add the "statusLine" block.</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num"><div class="step-circle">04</div><div class="step-line"></div></div>
+    <div class="step-body">
+      <div class="step-tag">Verify · 驗證</div>
+      <div class="step-title">測試是否正常</div>
+      <div class="step-desc">不用重啟，先在終端機確認腳本正確運作。<br><strong>Test the script</strong> before restarting Claude Code.</div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" data-id="c05" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body"><span class="c-str">'{"model":{"display_name":"Claude Sonnet 4"},
+  "workspace":{"current_dir":"/Users/test/myproject"},
+  "context_window":{"used_percentage":75}}'</span><span class="c-cmd"> \
+  | </span><span class="c-path">~/.claude/statusline.sh</span></div>
+      </div>
+      <div style="margin-top:12px;font-size:13px;color:#666;margin-bottom:10px">Expected output · 應該看到：</div>
+      <div class="preview-bar"><span>◆ Claude Sonnet 4</span><span>▸ myproject</span><span class="bar-green">▓ [███████░░░] 75%</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num"><div class="step-circle">05</div><div class="step-line"></div></div>
+    <div class="step-body">
+      <div class="step-tag">Done · 完成</div>
+      <div class="step-title">重啟 Claude Code</div>
+      <div class="step-desc">關掉 Claude Code 再重新開啟，狀態列就會出現在畫面最下方。<br><strong>Restart Claude Code</strong> and the statusline appears at the bottom.</div>
+      <div style="font-size:13px;color:#666;margin-bottom:12px">顏色說明 · Color meaning：</div>
+      <div class="color-badges">
+        <div class="badge badge-g">🟢 0–69% · 安全 Safe</div>
+        <div class="badge badge-y">🟡 70–89% · 注意 Watch out</div>
+        <div class="badge badge-r">🔴 90%+ · 開新 session</div>
+      </div>
+      <div style="font-size:13px;color:#666;margin:16px 0 12px">符號說明 · Symbol guide：</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-sym">◆</div><div class="legend-text">目前使用的模型<small>Current model (auto-detected)</small></div></div>
+        <div class="legend-item"><div class="legend-sym">▸</div><div class="legend-text">當前資料夾<small>Current folder</small></div></div>
+        <div class="legend-item"><div class="legend-sym">⎇</div><div class="legend-text">Git branch<small>Hidden if not a git repo</small></div></div>
+        <div class="legend-item"><div class="legend-sym">▓</div><div class="legend-text">Context 使用率<small>Context usage + progress bar</small></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Linux -->
+<div class="steps tab-content" id="os-linux">
+  <div class="step">
+    <div class="step-num"><div class="step-circle">01</div><div class="step-line"></div></div>
+    <div class="step-body">
+      <div class="step-tag">Prerequisite · 前置需求</div>
+      <div class="step-title">安裝 jq</div>
+      <div class="step-desc">依照你的 Linux 發行版選擇對應的指令。</div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">bash — Ubuntu / Debian</span><button class="copy-btn" data-id="c06" onclick="copyCode(this)">copy</button></div><div class="code-body"><span class="c-cmd">sudo apt install jq</span></div></div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">bash — Arch Linux</span><button class="copy-btn" data-id="c07" onclick="copyCode(this)">copy</button></div><div class="code-body"><span class="c-cmd">sudo pacman -S jq</span></div></div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">bash — Fedora / CentOS</span><button class="copy-btn" data-id="c08" onclick="copyCode(this)">copy</button></div><div class="code-body"><span class="c-cmd">sudo dnf install jq</span></div></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num"><div class="step-circle">02</div><div class="step-line"></div></div>
+    <div class="step-body">
+      <div class="step-tag">Download · 下載</div>
+      <div class="step-title">下載腳本</div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" data-id="c09" onclick="copyCode(this)">copy</button></div>
+      <div class="code-body"><span class="c-cmd">curl -o </span><span class="c-path">~/.claude/statusline.sh</span><span class="c-cmd"> \
+  https://raw.githubusercontent.com/miss31413/mico-claudebar/main/statusline.sh
+chmod +x </span><span class="c-path">~/.claude/statusline.sh</span></div></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num"><div class="step-circle">03</div><div class="step-line"></div></div>
+    <div class="step-body">
+      <div class="step-tag">Config · 設定</div>
+      <div class="step-title">修改 settings.json</div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">bash — open with nano</span><button class="copy-btn" data-id="c10" onclick="copyCode(this)">copy</button></div><div class="code-body"><span class="c-cmd">nano </span><span class="c-path">~/.claude/settings.json</span></div></div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">json — paste this · 貼入這段</span><button class="copy-btn" data-id="c11" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body"><span class="c-cmd">{
+  </span><span class="c-key">"statusLine"</span><span class="c-cmd">: {
+    </span><span class="c-key">"type"</span><span class="c-cmd">: </span><span class="c-str">"command"</span><span class="c-cmd">,
+    </span><span class="c-key">"command"</span><span class="c-cmd">: </span><span class="c-str">"~/.claude/statusline.sh"</span><span class="c-cmd">
+  }
+}</span></div>
+      </div>
+      <div class="note">按 <strong>Ctrl + O</strong> 儲存，再按 <strong>Ctrl + X</strong> 離開 nano。</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num"><div class="step-circle">04</div><div class="step-line"></div></div>
+    <div class="step-body">
+      <div class="step-tag">Done · 完成</div>
+      <div class="step-title">重啟 Claude Code</div>
+      <div class="step-desc">關掉再重開，狀態列出現在畫面最下方即完成。</div>
+      <div class="color-badges">
+        <div class="badge badge-g">🟢 0–69% · 安全</div>
+        <div class="badge badge-y">🟡 70–89% · 注意</div>
+        <div class="badge badge-r">🔴 90%+ · 開新 session</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Windows -->
+<div class="steps tab-content" id="os-windows">
+  <div class="step">
+    <div class="step-num"><div class="step-circle">01</div><div class="step-line"></div></div>
+    <div class="step-body">
+      <div class="step-tag">Download · 下載</div>
+      <div class="step-title">下載 PowerShell 腳本</div>
+      <div class="step-desc">Windows 版使用 PowerShell 腳本，不需要安裝 jq。<br><strong>Windows uses a PowerShell script</strong> — no jq required.</div>
+      <div class="note warn">⚠️ 需要 <strong>PowerShell 7（pwsh）</strong>，不是 Windows 內建的 PowerShell 5。<br>下載：<a href="https://aka.ms/powershell" style="color:var(--yellow)">aka.ms/powershell</a>（免費，安裝後電腦上會多一個 pwsh 指令）</div>
+      <div class="note">打開 <strong>PowerShell 7</strong>（開始選單搜尋「pwsh」）<br><span style="color:#555">Open PowerShell 7 from the Start menu — search "pwsh"</span></div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">powershell</span><button class="copy-btn" data-id="c12" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body"><span class="c-comment"># 建立資料夾（已存在也沒關係）</span>
+<span class="c-cmd">New-Item -ItemType Directory -Path </span><span class="c-str">"$env:USERPROFILE\.claude"</span><span class="c-cmd"> -Force
+
+</span><span class="c-comment"># 下載腳本</span>
+<span class="c-cmd">curl -o </span><span class="c-str">"$env:USERPROFILE\.claude\statusline.ps1"</span><span class="c-cmd"> \
+  https://raw.githubusercontent.com/miss31413/mico-claudebar/main/statusline.ps1</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num"><div class="step-circle">02</div><div class="step-line"></div></div>
+    <div class="step-body">
+      <div class="step-tag">Permission · 權限</div>
+      <div class="step-title">允許執行腳本</div>
+      <div class="step-desc">Windows 預設會擋住腳本執行，需要執行一次這個指令解除限制。<br><strong>Allow PowerShell scripts to run</strong> — required once per machine.</div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">powershell</span><button class="copy-btn" data-id="c13" onclick="copyCode(this)">copy</button></div><div class="code-body"><span class="c-cmd">Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</span></div></div>
+      <div class="note">這只影響你自己執行的腳本，不影響系統安全性。<br><span style="color:#555">This only affects scripts you run yourself — not a system security risk.</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num"><div class="step-circle">03</div><div class="step-line"></div></div>
+    <div class="step-body">
+      <div class="step-tag">Config · 設定</div>
+      <div class="step-title">修改 settings.json</div>
+      <div class="step-desc">設定檔在 <strong>%USERPROFILE%\.claude\settings.json</strong></div>
+      <div class="code-block"><div class="code-header"><span class="code-lang">powershell — open file</span><button class="copy-btn" data-id="c14" onclick="copyCode(this)">copy</button></div><div class="code-body"><span class="c-cmd">notepad </span><span class="c-str">"$env:USERPROFILE\.claude\settings.json"</span></div></div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">json — paste this · 貼入這段</span><button class="copy-btn" data-id="c15" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body"><span class="c-cmd">{
+  </span><span class="c-key">"statusLine"</span><span class="c-cmd">: {
+    </span><span class="c-key">"type"</span><span class="c-cmd">: </span><span class="c-str">"command"</span><span class="c-cmd">,
+    </span><span class="c-key">"command"</span><span class="c-cmd">: </span><span class="c-str">"pwsh -NoProfile -File %USERPROFILE%\.claude\statusline.ps1"</span><span class="c-cmd">
+  }
+}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num"><div class="step-circle">04</div><div class="step-line"></div></div>
+    <div class="step-body">
+      <div class="step-tag">Verify · 驗證</div>
+      <div class="step-title">測試腳本</div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">powershell</span><button class="copy-btn" data-id="c16" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body"><span class="c-str">'{"model":{"display_name":"Claude Sonnet 4"},
+  "workspace":{"current_dir":"C:\\Users\\test\\myproject"},
+  "context_window":{"used_percentage":75}}'</span><span class="c-cmd"> `
+  | pwsh -NoProfile -File </span><span class="c-str">"$env:USERPROFILE\.claude\statusline.ps1"</span></div>
+      </div>
+      <div style="margin-top:12px;font-size:13px;color:#666;margin-bottom:10px">Expected output · 應該看到：</div>
+      <div class="preview-bar"><span>◆ Claude Sonnet 4</span><span>▸ myproject</span><span class="bar-green">▓ [███████░░░] 75%</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num"><div class="step-circle">05</div><div class="step-line"></div></div>
+    <div class="step-body">
+      <div class="step-tag">Done · 完成</div>
+      <div class="step-title">重啟 Claude Code</div>
+      <div class="step-desc">關掉 Claude Code 再重新開啟，狀態列就會出現在畫面最下方。</div>
+      <div class="color-badges">
+        <div class="badge badge-g">🟢 0–69% · 安全</div>
+        <div class="badge badge-y">🟡 70–89% · 注意</div>
+        <div class="badge badge-r">🔴 90%+ · 開新 session</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Troubleshooting -->
+<div class="trouble-wrap" style="padding: 48px 40px 80px; border-top: 1px solid var(--border);">
+  <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px;">Troubleshooting · 常見問題</div>
+  <div class="trouble-grid">
+    <div class="trouble-item">
+      <div class="trouble-q">jq: command not found</div>
+      <div class="trouble-a">Step 1 的 jq 沒有安裝成功，回去重新執行安裝指令。<br><span style="color:#666">jq wasn't installed successfully — redo Step 1.</span></div>
+    </div>
+    <div class="trouble-item">
+      <div class="trouble-q">permission denied</div>
+      <div class="trouble-a">重新執行 <code>chmod +x ~/.claude/statusline.sh</code>（macOS/Linux）<br><span style="color:#666">Re-run the chmod command from Step 2.</span></div>
+    </div>
+    <div class="trouble-item">
+      <div class="trouble-q">狀態列沒有出現 · Statusline not showing</div>
+      <div class="trouble-a">確認 settings.json 的 JSON 格式正確，可以把內容貼到 <code>jsonlint.com</code> 檢查。<br><span style="color:#666">Validate your settings.json at jsonlint.com</span></div>
+    </div>
+    <div class="trouble-item">
+      <div class="trouble-q">Windows — 出現紅字執行錯誤</div>
+      <div class="trouble-a">確認使用的是 <code>pwsh</code>（PowerShell 7），不是 <code>powershell</code>（PowerShell 5）。<br><span style="color:#666">Make sure you're using pwsh (PowerShell 7), not the built-in powershell.</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const COPY_TEXT = {
+  'c01': 'brew install jq',
+  'c02': 'curl -o ~/.claude/statusline.sh https://raw.githubusercontent.com/miss31413/mico-claudebar/main/statusline.sh\nchmod +x ~/.claude/statusline.sh',
+  'c03': 'open ~/.claude/settings.json',
+  'c04': '{\n  "statusLine": {\n    "type": "command",\n    "command": "~/.claude/statusline.sh"\n  }\n}',
+  'c05': 'echo \'{"model":{"display_name":"Claude Sonnet 4"},"workspace":{"current_dir":"/Users/test/myproject"},"context_window":{"used_percentage":75}}\' | ~/.claude/statusline.sh',
+  'c06': 'sudo apt install jq',
+  'c07': 'sudo pacman -S jq',
+  'c08': 'sudo dnf install jq',
+  'c09': 'curl -o ~/.claude/statusline.sh https://raw.githubusercontent.com/miss31413/mico-claudebar/main/statusline.sh\nchmod +x ~/.claude/statusline.sh',
+  'c10': 'nano ~/.claude/settings.json',
+  'c11': '{\n  "statusLine": {\n    "type": "command",\n    "command": "~/.claude/statusline.sh"\n  }\n}',
+  'c12': 'New-Item -ItemType Directory -Path "$env:USERPROFILE\\.claude" -Force\ncurl -o "$env:USERPROFILE\\.claude\\statusline.ps1" https://raw.githubusercontent.com/miss31413/mico-claudebar/main/statusline.ps1',
+  'c13': 'Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser',
+  'c14': 'notepad "$env:USERPROFILE\\.claude\\settings.json"',
+  'c15': '{\n  "statusLine": {\n    "type": "command",\n    "command": "pwsh -NoProfile -File %USERPROFILE%\\.claude\\statusline.ps1"\n  }\n}',
+  'c16': '\'{"model":{"display_name":"Claude Sonnet 4"},"workspace":{"current_dir":"C:\\\\Users\\\\test\\\\myproject"},"context_window":{"used_percentage":75}}\' | pwsh -NoProfile -File "$env:USERPROFILE\\.claude\\statusline.ps1"'
+};
+
+function switchOS(os) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('os-' + os).classList.add('active');
+}
+
+function copyCode(btn) {
+  const text = COPY_TEXT[btn.getAttribute('data-id')] || '';
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
